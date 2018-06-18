@@ -48,8 +48,10 @@ spec:
             periodSeconds: 15
             timeoutSeconds: 5
           volumeMounts:
-          - name: applogs
-            mountPath: /var
+          - name: applog-error
+            mountPath: /var/log/access
+          - name: applog-error
+            mountPath: /var/log/error
           terminationMessagePath: /dev/termination-log
           terminationMessagePolicy: File
 
@@ -84,13 +86,17 @@ spec:
               cpu: 50m
               memory: 100Mi
           volumeMounts:
-          - name: applogs
-            mountPath: /log
+          - name: applog-error
+            mountPath: /log/access
+          - name: applog-error
+            mountPath: /log/error
       dnsPolicy: ClusterFirst
       restartPolicy: Always
       schedulerName: default-scheduler
       securityContext: {}
       terminationGracePeriodSeconds: 30
       volumes:
-      - name: applogs
+      - name: applog-access
+        emptyDir: {}
+      - name: applog-error
         emptyDir: {}
