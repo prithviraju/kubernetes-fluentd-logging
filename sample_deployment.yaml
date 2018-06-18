@@ -1,0 +1,96 @@
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  annotations:
+  labels:
+    app: app1
+  name: app1
+  namespace: app1
+spec:
+  replicas: 3
+  strategy:
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        app: app1
+    spec:
+      affinity:
+        podAntiAffinity:
+          preferredDuringSchedulingIgnoredDuringExecution:
+            - podAffinityTerm:
+                topologyKey: kubernetes.io/hostname
+              weight: 100
+      containers:
+        - name: app1
+          image: "IMAGE:VERSION"
+          env:
+            - name: NODE_APP
+              value: ""
+          imagePullPolicy: IfNotPresent
+          livenessProbe:
+            httpGet:
+              path: /health-check
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+
+          readinessProbe:
+            httpGet:
+              path: /health-check
+              port: 80
+            initialDelaySeconds: 30
+            periodSeconds: 15
+            timeoutSeconds: 5
+          volumeMounts:
+          - name: applogs
+            mountPath: /var
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+
+        - name: fluentd
+          image: IMAGE:VERSION_LOG
+          env:
+            - name: INSTANCE
+              value: "app1"
+            - name:  FLUENT_ELASTICSEARCH_HOST
+              value: ""
+            - name:  FLUENT_ELASTICSEARCH_PORT
+              value: "443"
+            - name: FLUENT_ELASTICSEARCH_SCHEME
+              value: "https"
+            - name: S3_LOGS_BUCKET_PREFIX
+              value: "app-logs/app1/"
+            - name: FLUENT_ELASTICSEARCH_LOGSTASH_PREFIX
+              value: "app1"
+            - name: FLUENT_ELASTICSEARCH_SSL_VERIFY
+              value: "true"
+            - name: FLUENT_ELASTICSEARCH_USER
+              value: ""
+            - name: FLUENT_ELASTICSEARCH_PASSWORD
+              value: ""
+            - name: FLUENT_ELASTICSEARCH_RELOAD_CONNECTIONS
+              value: "false"
+          imagePullPolicy: Always
+          resources:
+            limits:
+              memory: 100Mi
+            requests:
+              cpu: 50m
+              memory: 100Mi
+          volumeMounts:
+          - name: applogs
+            mountPath: /log
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: applogs
+        emptyDir: {}
