@@ -5,7 +5,7 @@
 
 ## Detailed Statement on solution and implementation
 
-(https://medium.com/@alluri.prithvi/application-logs-from-kubernetes-to-s3-and-elasticsearch-using-fluentd-2f1b09a9872e)
+https://medium.com/@alluri.prithvi/application-logs-from-kubernetes-to-s3-and-elasticsearch-using-fluentd-2f1b09a9872e
 
 ## To - Do 
 
